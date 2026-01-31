@@ -3,10 +3,33 @@ name: CI
 on:
   push:
 
+env:
+  DB_CONNECTION: pgsql
+  DB_HOST: 127.0.0.1
+  DB_PORT: 5432
+  DB_USERNAME: postgres
+  DB_PASSWORD: postgres
+  DB_DATABASE: laravel_test
+
 jobs:
   build:
     name: "Build and Test"
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: laravel_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: "checkout repository"
@@ -70,9 +93,6 @@ jobs:
 
       - name: "copy .env.example to .env"
         run: cp .env.example .env
-
-      - name: "create SQLite database"
-        run: touch database/database.sqlite
 
       - name: "set the application key"
         run: php artisan key:generate
