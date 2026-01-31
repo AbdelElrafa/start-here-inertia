@@ -14,20 +14,30 @@
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "laravel/wayfinder": "^0.1.9"
+        "laravel/wayfinder": "^0.1.9",
+        "smpita/configas": "^2.0",
+        "smpita/typeas": "^4.2",
+        "spatie/laravel-activitylog": "^4.11"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "*",
         "laravel/boost": "^2.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
         "laravel/sail": "^1.41",
+        "lendable/composer-license-checker": "*",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^4.3",
-        "pestphp/pest-plugin-laravel": "^4.0"
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "phpstan/extension-installer": "*",
+        "tomasvotruba/cognitive-complexity": "^1.0"
     },
     "autoload": {
+        "files": [
+            "app/helpers.php"
+        ],
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
@@ -65,8 +75,11 @@
         ],
         "test": [
             "@php artisan config:clear --ansi",
-            "@test:lint",
-            "@php artisan test"
+            "./vendor/bin/composer-license-checker",
+            "./vendor/bin/phpstan analyze --xdebug",
+            "./vendor/bin/pint --test --parallel",
+            "@php artisan test --parallel",
+            "command -v herd >/dev/null 2>&1 && herd coverage ./vendor/bin/pest --parallel --coverage || php artisan test --parallel --coverage"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -99,7 +112,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true
         }
     },
     "minimum-stability": "stable",
