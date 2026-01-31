@@ -7,11 +7,14 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     resolve: {
-        alias: {
-            '@': resolve(__dirname, 'resources/js'),
-        },
+        alias: [
+            { find: '@/routes', replacement: resolve(__dirname, 'resources/js/wayfinder/routes') },
+            { find: '@/actions', replacement: resolve(__dirname, 'resources/js/wayfinder') },
+            { find: '@', replacement: resolve(__dirname, 'resources/js') },
+        ],
     },
     plugins: [
+        wayfinder(),
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             ssr: 'resources/js/ssr.tsx',
@@ -23,7 +26,6 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder(),
     ],
     esbuild: {
         jsx: 'automatic',
