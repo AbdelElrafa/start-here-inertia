@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  build:
+    name: "Build and Test"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "cache PHP setup"
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/setup-php-cache
+            ~/.composer/cache
+          key: ${{ runner.os }}-php-8.5-setup-${{ hashFiles('.github/workflows/laravel.yml') }}
+          restore-keys: ${{ runner.os }}-php-8.5-setup-
+
+      - name: "setup PHP 8.5"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          tools: composer:v2
+          coverage: xdebug
+        env:
+          SETUP_PHP_CACHE: true
+
+      - name: "get composer cache directory"
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: "cache dependencies"
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: "install dependencies"
+        run: composer install --prefer-dist
+
+      - name: "run composer license checker"
+        run: ./vendor/bin/composer-license-checker
+
+      - name: "run pint"
+        run: php ./vendor/bin/pint --test
+
+      - name: "setup node v22"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: "install node dependencies"
+        run: npm ci
+
+      - name: "run prettier check"
+        run: npm run format:check
+
+      - name: "run eslint"
+        run: npm run lint
+
+      - name: "run PHPStan"
+        run: php ./vendor/bin/phpstan analyse
+
+      - name: "copy .env.example to .env"
+        run: cp .env.example .env
+
+      - name: "create SQLite database"
+        run: touch database/database.sqlite
+
+      - name: "set the application key"
+        run: php artisan key:generate
+
+      - name: "run artisan migrate"
+        run: php artisan migrate
+
+      - name: "cache built assets"
+        uses: actions/cache@v4
+        with:
+          path: public/build
+          key: ${{ runner.os }}-build-${{ hashFiles('resources/**/*', 'package-lock.json', 'vite.config.ts') }}
+          restore-keys: ${{ runner.os }}-build-
+
+      - name: "build assets"
+        run: npm run build
+
+      - name: "run tests with coverage"
+        run: ./vendor/bin/pest --parallel --coverage
+
+      - name: "run artisan config:cache"
+        run: php artisan config:cache
+
+      - name: "run artisan event:cache"
+        run: php artisan event:cache
+
+      - name: "run artisan route:cache"
+        run: php artisan route:cache
+
+      - name: "run artisan view:cache"
+        run: php artisan view:cache
+
+      - name: "run artisan optimize"
+        run: php artisan optimize
