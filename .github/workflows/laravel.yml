@@ -67,29 +67,14 @@ jobs:
       - name: "install dependencies"
         run: composer install --prefer-dist
 
-      - name: "run composer license checker"
-        run: ./vendor/bin/composer-license-checker
-
-      - name: "run pint"
-        run: php ./vendor/bin/pint --test
-
-      - name: "setup node v22"
+      - name: "setup node"
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: ".nvmrc"
           cache: "npm"
 
       - name: "install node dependencies"
         run: npm ci
-
-      - name: "run prettier check"
-        run: npm run format:check
-
-      - name: "run eslint"
-        run: npm run lint
-
-      - name: "run PHPStan"
-        run: php ./vendor/bin/phpstan analyse
 
       - name: "copy .env.example to .env"
         run: cp .env.example .env
@@ -100,8 +85,8 @@ jobs:
       - name: "run artisan migrate"
         run: php artisan migrate
 
-      - name: "generate wayfinder routes"
-        run: php artisan wayfinder:generate
+      - name: "run test suite"
+        run: composer test
 
       - name: "cache built assets"
         uses: actions/cache@v4
