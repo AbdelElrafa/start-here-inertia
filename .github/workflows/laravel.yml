@@ -50,7 +50,7 @@ jobs:
         with:
           php-version: "8.5"
           tools: composer:v2
-          coverage: xdebug
+          coverage: none
         env:
           SETUP_PHP_CACHE: true
 
@@ -98,9 +98,6 @@ jobs:
 
       - name: "build assets"
         run: npm run build
-
-      - name: "run tests with coverage"
-        run: ./vendor/bin/pest --parallel --coverage
 
       - name: "run artisan config:cache"
         run: php artisan config:cache

@@ -76,7 +76,7 @@
         "test": [
             "@php artisan config:clear --ansi",
             "./vendor/bin/composer-license-checker",
-            "./vendor/bin/phpstan analyze --xdebug",
+            "./vendor/bin/phpstan analyze",
             "./vendor/bin/pint --test --parallel",
             "@php artisan wayfinder:generate --fresh --no-interaction --ansi",
             "npm run format:check",
