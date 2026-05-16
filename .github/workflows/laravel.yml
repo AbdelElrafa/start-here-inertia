@@ -4,6 +4,7 @@ on:
   push:
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   DB_CONNECTION: pgsql
   DB_HOST: 127.0.0.1
   DB_PORT: 5432
